@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jabfy-bus"
+version = "0.0.1"
+description = "JABFY Universal JSON Bus - normalisation d'événements IoT multi-protocoles avec vérification avant exécution"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Proprietary" }
+authors = [{ name = "Jabfy Corp" }]
+keywords = ["iot", "mqtt", "zigbee", "modbus", "smart-home", "bus", "normalization"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Home Automation",
+]
+
+[project.optional-dependencies]
+mqtt = ["paho-mqtt>=2.0"]
+api = ["fastapi>=0.110", "uvicorn>=0.29"]
+modbus = ["pymodbus>=3.6"]
+yaml = ["pyyaml>=6.0"]
+all = ["jabfy-bus[mqtt,api,modbus,yaml]"]
+
+[project.scripts]
+jabfy-bus = "jabfy_bus.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["jabfy_bus*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

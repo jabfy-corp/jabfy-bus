@@ -1,1 +1,19 @@
 .claude
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# Outils
+.ruff_cache/
+.pytest_cache/
+.coverage
+
+# Artefacts locaux
+audit.jsonl
+*.local.yaml
