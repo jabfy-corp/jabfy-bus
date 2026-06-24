@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jabfy.io/schemas/bus-message-1.0.json",
+  "title": "JABFY Universal JSON Bus Message",
+  "type": "object",
+  "required": ["bus_version", "message_id", "timestamp", "message_type", "source"],
+  "properties": {
+    "bus_version": { "const": "1.0" },
+    "message_id": { "type": "string", "minLength": 1 },
+    "correlation_id": { "type": ["string", "null"] },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "message_type": {
+      "enum": [
+        "telemetry",
+        "state.changed",
+        "event",
+        "command.requested",
+        "command.approved",
+        "command.rejected",
+        "command.executed",
+        "capability.report",
+        "health",
+        "audit",
+        "simulation"
+      ]
+    },
+    "source": {
+      "type": "object",
+      "required": ["adapter", "protocol"],
+      "properties": {
+        "adapter": { "type": "string", "minLength": 1 },
+        "protocol": { "type": "string", "minLength": 1 },
+        "device_id": { "type": ["string", "null"] },
+        "bridge": { "type": ["string", "null"] },
+        "raw_address": { "type": ["string", "null"] },
+        "extra": { "type": "object" }
+      }
+    },
+    "entity": {
+      "type": ["object", "null"],
+      "required": ["id", "domain"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "domain": { "type": "string", "minLength": 1 },
+        "class": { "type": ["string", "null"] },
+        "name": { "type": ["string", "null"] },
+        "location": { "type": ["string", "null"] },
+        "asset": { "type": ["string", "null"] }
+      }
+    },
+    "value": {
+      "type": ["object", "null"],
+      "properties": {
+        "raw": {},
+        "normalized": {},
+        "unit": { "type": ["string", "null"] },
+        "datatype": { "type": ["string", "null"] },
+        "scale": { "type": ["number", "null"] }
+      }
+    },
+    "command": {
+      "type": ["object", "null"],
+      "required": ["action"],
+      "properties": {
+        "action": { "type": "string", "minLength": 1 },
+        "target": { "type": "string" },
+        "protocol": { "type": "string" },
+        "params": { "type": "object" }
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "quality": {
+      "type": "object",
+      "properties": {
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "source_quality": { "type": "string" },
+        "stale": { "type": "boolean" }
+      }
+    },
+    "security": {
+      "type": "object",
+      "properties": {
+        "trust_level": {
+          "enum": ["untrusted", "local_network", "local_gateway", "verified_device", "internal"]
+        },
+        "auth_context": { "type": ["string", "null"] },
+        "verified": { "type": "boolean" },
+        "write_allowed": { "type": "boolean" }
+      }
+    },
+    "raw": {
+      "type": "object",
+      "description": "Payload et métadonnées d'origine, jamais supprimés par la normalisation."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "message_type": { "pattern": "^command\\." } }
+      },
+      "then": {
+        "required": ["command"]
+      }
+    }
+  ]
+}
