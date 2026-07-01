@@ -1,0 +1,67 @@
+# Exemple de configuration JABFY Universal JSON Bus
+# Usage : jabfy-bus serve --config config.yaml   (nécessite pyyaml)
+
+history_size: 1000
+audit_path: ./audit.jsonl
+
+api:
+  host: 127.0.0.1
+  port: 8080
+
+adapters:
+  - type: mqtt
+    name: mqtt_main
+    mode: read_only            # read_write doit être explicite
+    options:
+      host: 127.0.0.1
+      port: 1883
+      subscriptions:
+        - "zigbee2mqtt/#"
+        - "home/#"
+
+  - type: zigbee2mqtt
+    name: z2m
+    options:
+      base_topic: zigbee2mqtt
+
+  - type: http_poll
+    name: shelly_plugs
+    options:
+      endpoints:
+        - url: http://192.168.1.42/status
+          entity_id: switch.shelly_plug_01
+          domain: switch
+          value_path: relays.0.ison
+          interval_s: 10
+
+  - type: modbus_tcp
+    name: boiler_room
+    mode: read_only
+    options:
+      host: 192.168.10.20
+      port: 502
+      unit_id: 1
+      registers:
+        - address: 40001
+          register_type: holding_register
+          entity_id: sensor.boiler_temperature
+          domain: sensor
+          class: temperature
+          unit: "°C"
+          scale: 0.1
+          asset: boiler_01
+
+policies:
+  - name: home_light_low_risk_v1
+    effect: allow
+    max_risk: medium
+    domains: [light, switch]
+    actions: [turn_on, turn_off, toggle]
+    min_trust: internal
+    time_window: { start: "07:00", end: "23:30" }
+
+  - name: never_unlock_unattended
+    effect: deny
+    max_risk: critical
+    domains: [lock, alarm]
+    min_trust: untrusted
