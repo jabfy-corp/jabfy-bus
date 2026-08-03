@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -77,8 +78,12 @@ def cmd_serve(args: argparse.Namespace) -> int:
 
     app = create_app(bus, registry, audit)
     register_ws_routes(app, bus)
-    host = config.api_host if config else "127.0.0.1"
-    port = config.api_port if config else 8080
+    host = (
+        config.api_host
+        if config
+        else os.getenv("JABFY_BUS_HOST", "127.0.0.1")
+    )
+    port = config.api_port if config else int(os.getenv("JABFY_BUS_PORT", "8080"))
     uvicorn.run(app, host=host, port=port)
     return 0
 

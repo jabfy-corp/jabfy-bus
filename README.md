@@ -66,6 +66,24 @@ pip install .            # cœur, stdlib uniquement
 pip install ".[all]"     # + paho-mqtt, fastapi/uvicorn, pymodbus, pyyaml
 ```
 
+## Conteneur et déploiement
+
+Chaque push sur `main` publie une image OCI :
+
+```text
+ghcr.io/jabfy-corp/jabfy-bus:latest
+ghcr.io/jabfy-corp/jabfy-bus:sha-<commit>
+```
+
+L'image lance l'API du bus sur le port `8080`. Utiliser son digest immuable pour
+un déploiement et, si nécessaire, fournir une configuration montée en volume :
+
+```bash
+docker run --rm -p 8080:8080 \
+  -e JABFY_BUS_HOST=0.0.0.0 \
+  ghcr.io/jabfy-corp/jabfy-bus@sha256:<digest>
+```
+
 ## Exemple de message normalisé
 
 ```json
