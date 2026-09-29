@@ -40,6 +40,12 @@ def to_mqtt(command: dict[str, Any]) -> dict[str, Any]:
         payload = {"color": command["params"]["color"]}
     elif action is Action.SET_TEMPERATURE:
         payload = {"occupied_heating_setpoint": command["params"]["temperature"]}
+    elif action is Action.SET_POSITION:
+        payload = {"position": command["params"]["position"]}
+    elif action is Action.SET_TILT:
+        payload = {"tilt": command["params"]["tilt"]}
+    elif action is Action.SET_MODE:
+        payload = {"system_mode": command["params"]["mode"]}
     else:
         payload = {"action": action.value, **command.get("params", {})}
     return {"target": topic, "payload": payload}

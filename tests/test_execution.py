@@ -27,6 +27,14 @@ class TestTranslators(unittest.TestCase):
         })
         self.assertEqual(native["payload"], {"brightness": 128})
 
+    def test_mqtt_cover_and_mode_payloads(self):
+        cases = [("set_position", {"position": 40}, {"position": 40}),
+                 ("set_tilt", {"tilt": 70}, {"tilt": 70}),
+                 ("set_mode", {"mode": "cool"}, {"system_mode": "cool"})]
+        for action, params, payload in cases:
+            native = to_mqtt({"action": action, "target": "zigbee2mqtt/blind", "params": params})
+            self.assertEqual(native["payload"], payload)
+
     def test_http_turn_off(self):
         native = to_http({"action": "turn_off", "target": "http://192.168.1.42/relay/0"})
         self.assertEqual(native["target"], "http://192.168.1.42/relay/0?turn=off")
