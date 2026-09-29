@@ -5,8 +5,6 @@ commande. Endpoints prévus : /bus/events, /verification/decisions,
 /audit/live.
 """
 
-from __future__ import annotations
-
 import asyncio
 import json
 from typing import Any
@@ -54,11 +52,26 @@ class BusEventStream:
         return await self.queue.get()
 
 
-def register_ws_routes(app: Any, bus: UniversalJsonBus) -> None:
-    """Ajoute les endpoints WebSocket à une app FastAPI existante."""
+def register_ws_routes(
+    app: Any,
+    bus: UniversalJsonBus,
+    allowed_origins: list[str] | None = None,
+) -> None:
+    """Ajoute les endpoints WebSocket à une app FastAPI existante.
+
+    Un client navigateur envoie toujours `Origin` : s'il n'est pas dans
+    `allowed_origins`, la connexion est refusée (1008). Un client sans
+    `Origin` (CLI, service local) reste accepté.
+    """
     from fastapi import WebSocket, WebSocketDisconnect  # noqa: PLC0415 - optionnel
 
+    origins = set(allowed_origins or [])
+
     async def _stream(websocket: WebSocket, pattern: str) -> None:
+        origin = websocket.headers.get("origin")
+        if origin is not None and origin not in origins:
+            await websocket.close(code=1008)
+            return
         await websocket.accept()
         stream = BusEventStream(bus, pattern=pattern)
         stream.start()

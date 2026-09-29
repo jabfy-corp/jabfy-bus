@@ -65,7 +65,7 @@ def cmd_serve(args: argparse.Namespace) -> int:
     from jabfy_bus.api.app import create_app  # noqa: PLC0415
     from jabfy_bus.api.ws import register_ws_routes  # noqa: PLC0415
     from jabfy_bus.audit.log import AuditLog  # noqa: PLC0415
-    from jabfy_bus.config import load_config  # noqa: PLC0415
+    from jabfy_bus.config import DEFAULT_ALLOWED_ORIGINS, load_config  # noqa: PLC0415
     from jabfy_bus.core.bus import UniversalJsonBus  # noqa: PLC0415
     from jabfy_bus.core.registry import EntityRegistry  # noqa: PLC0415
 
@@ -76,8 +76,9 @@ def cmd_serve(args: argparse.Namespace) -> int:
     audit = AuditLog(config.audit_path if config else None)
     audit.attach(bus)
 
-    app = create_app(bus, registry, audit)
-    register_ws_routes(app, bus)
+    allowed_origins = config.allowed_origins if config else list(DEFAULT_ALLOWED_ORIGINS)
+    app = create_app(bus, registry, audit, allowed_origins=allowed_origins)
+    register_ws_routes(app, bus, allowed_origins=allowed_origins)
     host = (
         config.api_host
         if config

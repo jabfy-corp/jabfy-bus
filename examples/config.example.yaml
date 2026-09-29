@@ -7,6 +7,8 @@ audit_path: ./audit.jsonl
 api:
   host: 127.0.0.1
   port: 8080
+  allowed_origins:
+    - http://localhost:5173
 
 adapters:
   - type: mqtt

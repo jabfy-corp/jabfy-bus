@@ -10,6 +10,9 @@ from typing import Any
 from jabfy_bus.verification.policies import Policy, policy_from_dict
 
 
+DEFAULT_ALLOWED_ORIGINS = ("http://localhost:5173",)
+
+
 @dataclass
 class AdapterConfig:
     type: str
@@ -28,6 +31,7 @@ class BusConfig:
     history_size: int = 500
     api_host: str = "127.0.0.1"
     api_port: int = 8080
+    allowed_origins: list[str] = field(default_factory=lambda: list(DEFAULT_ALLOWED_ORIGINS))
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "BusConfig":
@@ -48,6 +52,9 @@ class BusConfig:
             history_size=data.get("history_size", 500),
             api_host=data.get("api", {}).get("host", "127.0.0.1"),
             api_port=data.get("api", {}).get("port", 8080),
+            allowed_origins=list(
+                data.get("api", {}).get("allowed_origins", DEFAULT_ALLOWED_ORIGINS)
+            ),
         )
 
 
