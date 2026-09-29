@@ -24,6 +24,7 @@ class MessageType(str, Enum):
     HEALTH = "health"
     AUDIT = "audit"
     SIMULATION = "simulation"
+    USER_SITUATION = "user_situation"
 
 
 class Domain(str, Enum):
