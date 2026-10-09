@@ -11,9 +11,12 @@ L'Execution Layer ne consomme que des `command.approved` émis ici.
 from __future__ import annotations
 
 import logging
+from copy import deepcopy
 from datetime import datetime
+from threading import RLock
 from typing import Callable
 
+from jabfy_bus.audit.log import AuditLog
 from jabfy_bus.core.bus import UniversalJsonBus
 from jabfy_bus.core.message import BusMessage, new_message
 from jabfy_bus.core.types import MessageType, RiskLevel, TrustLevel
@@ -33,11 +36,17 @@ class VerificationEngine:
         bus: UniversalJsonBus,
         policies: list[Policy] | None = None,
         clock: Clock | None = None,
+        authorizer: Callable[[BusMessage], PolicyDecision] | None = None,
+        audit: AuditLog | None = None,
     ) -> None:
         self.bus = bus
         self.policies: list[Policy] = list(policies or [])
         self.clock: Clock = clock or datetime.now
         self.decisions: list[PolicyDecision] = []
+        self.authorizer = authorizer
+        self.audit = audit
+        self._admissions: dict[str, dict] = {}
+        self._lock = RLock()
 
     def attach(self) -> None:
         self.bus.subscribe(
@@ -47,6 +56,19 @@ class VerificationEngine:
     # -- décision ----------------------------------------------------------
 
     def review(self, message: BusMessage) -> PolicyDecision:
+        with self._lock:
+            return self._review(message)
+
+    def _review(self, message: BusMessage) -> PolicyDecision:
+        if self.authorizer is not None:
+            try:
+                decision = self.authorizer(message)
+            except Exception:
+                logger.exception("Authorization failed; command denied")
+                decision = PolicyDecision("rejected", "guard_error", "Authorization unavailable", RiskLevel.CRITICAL)
+            self.decisions.append(decision)
+            self._publish_decision(message, decision)
+            return decision
         command = message.command or {}
         action = command.get("action", "")
         risk = classify_risk(action, message.entity)
@@ -114,4 +136,18 @@ class VerificationEngine:
             decision.policy,
             decision.risk.value,
         )
-        self.bus.publish(outcome)
+        # Persist BEFORE granting admission. Audit I/O errors must prevent dispatch.
+        if self.audit is not None:
+            self.audit.record_message(outcome)
+        if decision.approved:
+            self._admissions[outcome.message_id] = deepcopy(outcome.to_dict())
+        try:
+            self.bus.publish(outcome)
+        finally:
+            self._admissions.pop(outcome.message_id, None)
+
+    def consume_approval(self, message: BusMessage) -> bool:
+        """One-use admission valid only during synchronous dispatch of this exact payload."""
+        with self._lock:
+            expected = self._admissions.pop(message.message_id, None)
+            return expected is not None and expected == message.to_dict()

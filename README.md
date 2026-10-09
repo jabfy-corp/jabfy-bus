@@ -1,5 +1,17 @@
 # JABFY Universal JSON Bus
 
+## Intégration maison virtuelle V0.0.1
+
+Le simulateur peut fournir un `authorizer` à `VerificationEngine` : le résultat
+de Guard remplace alors les politiques historiques. L'audit fourni au moteur est
+écrit avant dispatch ; une erreur empêche l'envoi. Configurer l'exécuteur avec
+`approval_validator=engine.consume_approval` pour n'accepter que la commande exacte,
+une seule fois, pendant son dispatch synchrone. Ces options sont installées par la
+runtime de `jabfy-simulation`, orchestré par `jabfy-deploy` pour la V0.0.1.
+Le mode historique autonome reste inchangé ;
+`jabfy-bus serve` est une API de consultation, pas le runtime de cette livraison.
+Le journal persistant refuse de prolonger une chaîne corrompue.
+
 Couche de normalisation d'événements IoT multi-protocoles : chaque
 protocole (MQTT, Zigbee, Modbus, HTTP…) est traduit vers un langage
 JSON commun, **chaque action est vérifiée avant exécution**, chaque
