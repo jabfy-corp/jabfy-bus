@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+from threading import RLock
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -53,12 +55,22 @@ class AuditLog:
         self.path = Path(path) if path is not None else None
         self._records: list[AuditRecord] = []
         self._last_hash = GENESIS
+        self._lock = RLock()
+        self._failed = False
         if self.path is not None and self.path.exists():
             self._load()
+            if not self.verify():
+                raise ValueError("Audit chain is invalid; refusing to append")
 
     # -- écriture -----------------------------------------------------------
 
     def append(self, body: dict[str, Any]) -> AuditRecord:
+        with self._lock:
+            return self._append(body)
+
+    def _append(self, body: dict[str, Any]) -> AuditRecord:
+        if self._failed:
+            raise OSError("Audit writer failed; reopen and verify the journal before retrying")
         record = AuditRecord(
             seq=len(self._records),
             timestamp=datetime.now(timezone.utc).isoformat(),
@@ -71,11 +83,17 @@ class AuditLog:
             "timestamp": record.timestamp,
             "body": record.body,
         })
+        if self.path is not None:
+            try:
+                with self.path.open("a", encoding="utf-8") as fh:
+                    fh.write(_canonical(record.to_dict()) + "\n")
+                    fh.flush()
+                    os.fsync(fh.fileno())
+            except OSError:
+                self._failed = True
+                raise
         self._records.append(record)
         self._last_hash = record.hash
-        if self.path is not None:
-            with self.path.open("a", encoding="utf-8") as fh:
-                fh.write(_canonical(record.to_dict()) + "\n")
         return record
 
     def record_message(self, message: BusMessage) -> AuditRecord:
@@ -132,4 +150,7 @@ class AuditLog:
 
 def verify_file(path: str | Path) -> bool:
     """Vérifie un fichier d'audit sans le charger dans un AuditLog actif."""
-    return AuditLog(path).verify()
+    try:
+        return AuditLog(path).verify()
+    except (ValueError, TypeError, KeyError):
+        return False

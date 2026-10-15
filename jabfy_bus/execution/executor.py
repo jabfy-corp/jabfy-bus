@@ -27,9 +27,11 @@ Transport = Callable[[str, Any], None]
 class ExecutionLayer:
     """Exécute les commandes approuvées via les transports enregistrés."""
 
-    def __init__(self, bus: UniversalJsonBus, audit: AuditLog | None = None) -> None:
+    def __init__(self, bus: UniversalJsonBus, audit: AuditLog | None = None,
+                 approval_validator: Callable[[BusMessage], bool] | None = None) -> None:
         self.bus = bus
         self.audit = audit
+        self.approval_validator = approval_validator
         self._transports: dict[str, Transport] = {}
         self.executed = 0
         self.failed = 0
@@ -46,7 +48,9 @@ class ExecutionLayer:
 
     def execute(self, message: BusMessage) -> bool:
         """Exécute une commande approuvée. Retourne True si succès."""
-        if message.correlation_id is None or message.source.adapter != "verification_engine":
+        if (message.message_type != MessageType.COMMAND_APPROVED.value
+                or message.correlation_id is None or message.source.adapter != "verification_engine"
+                or (self.approval_validator is not None and not self.approval_validator(message))):
             # Défense en profondeur : une "approbation" ne venant pas du
             # Verification Engine est un contournement, pas une commande.
             raise VerificationBypass(message.message_id)
