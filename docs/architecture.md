@@ -33,7 +33,11 @@ Audit Logs               (jabfy_bus/audit)
    (`VerificationBypass`).
 4. **Chaque décision est traçable.** L'audit est append-only, avec
    chaînage de hash SHA-256 : toute altération casse la chaîne.
-5. **Read-only par défaut.** Un adapter doit être explicitement
+5. **Une approbation n'est valable qu'une fois.** Avec
+   `approval_validator=engine.consume_approval`, l'Execution Layer
+   n'accepte que la commande exacte approuvée, une seule fois, pendant
+   son dispatch synchrone (voir `security.md`).
+6. **Read-only par défaut.** Un adapter doit être explicitement
    configuré `read_write`, et côté Modbus chaque registre doit en
    plus opter pour l'écriture (`write_allowed`).
 
@@ -63,6 +67,19 @@ ExecutionLayer.execute() → translate("mqtt", command) → transport MQTT
 | `audit` | Journal append-only à chaînage de hash |
 | `simulation` | Devices simulés, lab, scénarios de démo |
 | `api` | Consultation HTTP + flux WebSocket (lecture seule) |
+
+## Intégration V0.0.1 (maison virtuelle)
+
+Le bus est embarqué par `jabfy-simulation`, qui lui injecte :
+
+- un `authorizer` (Guard) dans `VerificationEngine`, à la place des
+  policies historiques ;
+- un `AuditLog` écrit avant dispatch ;
+- `approval_validator=engine.consume_approval` dans `ExecutionLayer`.
+
+`jabfy-deploy` orchestre la pile locale. Le mode autonome (policies +
+`jabfy-bus demo`) reste disponible et inchangé. Exemple de code dans
+`interfaces.md`.
 
 ## Priorités protocolaires
 
