@@ -15,6 +15,18 @@ Pipeline complet, démontrable, propre :
 
 Démo : `jabfy-bus demo --steps 10`
 
+## Phase 1bis — Intégration V0.0.1 ✅
+
+Fusionnée sur `main` le 26/10/2026 (PR #6).
+
+- [x] `authorizer` externe (Guard) dans le Verification Engine
+- [x] Audit écrit avant dispatch (`fsync`), refus si chaîne corrompue
+- [x] Admission à usage unique (`consume_approval`)
+- [x] Type de message `user_situation` (consigne utilisateur venant de Core)
+- [x] Origines autorisées pour l'API (CORS, WebSocket)
+- [x] Actions `set_position`, `set_tilt`, `set_mode`
+- [x] Publication de l'image conteneur (`ghcr.io/jabfy-corp/jabfy-bus`) à chaque push sur `main`
+
 ## Phase 2 — Domotique sérieuse
 
 - [x] Zigbee2MQTT deep mapping (exposes, inventaire bridge)
@@ -29,7 +41,7 @@ Démo : `jabfy-bus demo --steps 10`
 - [ ] OPC UA read/subscribe adapter
 - [ ] BACnet adapter
 - [ ] KNX IP adapter
-- [ ] Risk policies avancées (validation humaine pour high/critical)
+- [ ] Risk policies avancées (validation humaine pour high/critical) — le refus par Guard est déjà en place, pas la validation humaine
 
 ## Phase 4 — IoT étendu
 

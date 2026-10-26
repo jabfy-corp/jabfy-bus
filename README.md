@@ -48,7 +48,7 @@ Audit Logs               append-only, chaînage SHA-256
 
 ```bash
 # aucune dépendance requise pour le cœur (stdlib uniquement)
-make test          # 81 tests unitaires
+make test          # 96 tests unitaires
 make demo          # scénario motion -> light en simulation
 ```
 
@@ -121,7 +121,12 @@ docker run --rm -p 8080:8080 \
 
 | Document | Contenu |
 |---|---|
+| [docs/README.md](docs/README.md) | Rôle dans l'architecture, état actuel et TODO |
+| [docs/installation.md](docs/installation.md) | Installation, commandes, configuration, conteneur |
 | [docs/architecture.md](docs/architecture.md) | Architecture et flux des messages |
+| [docs/interfaces.md](docs/interfaces.md) | Messages, format des commandes, API Python, HTTP et WebSocket |
+| [docs/tests.md](docs/tests.md) | Tests, couverture et CI |
+| [docs/code/README.md](docs/code/README.md) | Documentation du code, fichier par fichier |
 | [docs/message-schema.md](docs/message-schema.md) | Schéma de message v1.0 |
 | [docs/security.md](docs/security.md) | Règles de sécurité, risques, policies |
 | [docs/adapters.md](docs/adapters.md) | Guide des adapters existants et à venir |

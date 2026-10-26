@@ -18,8 +18,22 @@ command.requested → Verification Engine → command.approved | command.rejecte
 ```
 
 Interdit absolu : `IA → publish MQTT direct`. L'Execution Layer lève
-`VerificationBypass` si un `command.approved` ne provient pas du
-Verification Engine ou n'a pas de `correlation_id`.
+`VerificationBypass` si le message n'est pas un `command.approved`, ne
+provient pas du Verification Engine, n'a pas de `correlation_id`, ou
+(si un `approval_validator` est configuré) n'a pas d'admission valide.
+
+### Admission à usage unique (V0.0.1)
+
+- Le Verification Engine mémorise chaque approbation émise (copie du
+  message exact) pendant son dispatch synchrone uniquement.
+- `ExecutionLayer(approval_validator=engine.consume_approval)` n'exécute
+  que la commande **identique (même `to_dict()`)** à celle approuvée, **une
+  seule fois** : un rejeu ou un payload modifié lève `VerificationBypass`.
+- `VerificationEngine(authorizer=...)` délègue la décision à un
+  autorisateur externe (Guard dans la maison virtuelle) : son résultat
+  remplace alors les policies historiques. Si l'autorisateur échoue, la
+  commande est **refusée** (`guard_error`, risque `critical`).
+- Sans ces options, le mode historique autonome est inchangé.
 
 ## 3. Niveaux de risque
 
@@ -60,11 +74,22 @@ l'évaluation des policies (`min_trust`).
   précédent ; `jabfy-bus audit-verify <fichier>` détecte toute
   altération.
 - Tracés automatiquement : tous les `command.*` + les messages `audit`.
+- **Écrit avant dispatch** : si un `audit` est fourni au Verification
+  Engine, la décision est journalisée (flush + `fsync`) *avant* la
+  publication de l'approbation. Une erreur d'écriture empêche l'envoi.
+- Après une erreur d'I/O, le journal se verrouille (`OSError`) tant qu'il
+  n'est pas rouvert et vérifié.
+- À l'ouverture d'un fichier existant, la chaîne est vérifiée : une chaîne
+  corrompue lève `ValueError` et **refuse d'être prolongée**.
+  `verify_file()` renvoie `False` au lieu de lever sur un fichier invalide.
+- Écritures protégées par un verrou (`RLock`) : sûr entre threads.
 
 ## 7. Surfaces d'exposition
 
-- L'API HTTP/WebSocket est **en lecture seule** : aucun endpoint
-  d'exécution. Les commandes entrent uniquement par le bus.
+- L'API HTTP/WebSocket (`jabfy-bus serve`) est **en lecture seule** :
+  aucun endpoint d'exécution. Les commandes entrent uniquement par le
+  bus. Ce n'est pas le runtime de la V0.0.1, qui est porté par
+  `jabfy-simulation` et orchestré par `jabfy-deploy`.
 - Origines autorisées (`api.allowed_origins`, défaut
   `http://localhost:5173`) :
   - HTTP : CORS limité à ces origines, méthode `GET` et en-tête
