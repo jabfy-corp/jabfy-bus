@@ -30,11 +30,6 @@ flowchart LR
 | jabfy-deploy | Lance la pile V0.0.1. Le bus n'y est pas un service séparé. |
 | Appareils | Parlent leur protocole natif ; seuls les adapters le connaissent. |
 
-## Deux façons de l'utiliser
-
-- **Embarqué**, comme bibliothèque Python : c'est le cas de la V0.0.1, où jabfy-simulation construit le bus et y branche Guard. Voir [Interfaces](interfaces.md).
-- **Autonome**, en ligne de commande : `jabfy-bus demo` rejoue un scénario complet en simulation, `jabfy-bus serve` expose une API de consultation. Voir [Installation et lancement](installation.md).
-
 ## Pages
 
 | Page | Contenu |
@@ -47,6 +42,11 @@ flowchart LR
 | [Adapters](adapters.md) | Adapters existants et à venir |
 | [Tests](tests.md) | Lancer les tests, ce qu'ils couvrent, CI |
 | [Roadmap](roadmap.md) | Phases réalisées et à venir |
+
+## Deux façons de l'utiliser
+
+- **Embarqué**, comme bibliothèque Python : c'est le cas de la V0.0.1, où jabfy-simulation construit le bus et y branche Guard. Voir [Interfaces](interfaces.md).
+- **Autonome**, en ligne de commande : `jabfy-bus demo` rejoue un scénario complet en simulation, `jabfy-bus serve` expose une API de consultation. Voir [Installation et lancement](installation.md).
 
 ## État actuel
 
