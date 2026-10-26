@@ -126,6 +126,7 @@ docker run --rm -p 8080:8080 \
 | [docs/architecture.md](docs/architecture.md) | Architecture et flux des messages |
 | [docs/interfaces.md](docs/interfaces.md) | Messages, format des commandes, API Python, HTTP et WebSocket |
 | [docs/tests.md](docs/tests.md) | Tests, couverture et CI |
+| [docs/code/README.md](docs/code/README.md) | Documentation du code, fichier par fichier |
 | [docs/message-schema.md](docs/message-schema.md) | Schéma de message v1.0 |
 | [docs/security.md](docs/security.md) | Règles de sécurité, risques, policies |
 | [docs/adapters.md](docs/adapters.md) | Guide des adapters existants et à venir |
