@@ -35,6 +35,10 @@ une action anodine sur une serrure reste `high`. Une action ou un
 domaine inconnus sont classés `critical` (on ne devine jamais qu'une
 commande est bénigne).
 
+Les actions de position (`set_position`, `set_tilt`) et de mode
+(`set_mode`, traduite en `system_mode` pour Zigbee2MQTT) sont `medium` :
+volets et climatisation demandent donc une policy explicite.
+
 ## 4. Policies
 
 Déclaratives, évaluées dans l'ordre, première qui matche gagne.
@@ -61,6 +65,16 @@ l'évaluation des policies (`min_trust`).
 
 - L'API HTTP/WebSocket est **en lecture seule** : aucun endpoint
   d'exécution. Les commandes entrent uniquement par le bus.
+- Origines autorisées (`api.allowed_origins`, défaut
+  `http://localhost:5173`) :
+  - HTTP : CORS limité à ces origines, méthode `GET` et en-tête
+    `Content-Type` uniquement, sans credentials ;
+  - WebSocket : un navigateur envoie toujours `Origin` ; une origine
+    absente de la liste est refusée (fermeture 1008). Un client sans
+    `Origin` (CLI, service local) reste accepté.
+  - `register_ws_routes(app, bus, allowed_origins=...)` applique la
+    même règle quand le bus est embarqué dans un autre service (Core).
+    Sans liste, toute connexion navigateur est refusée.
 - Broker MQTT : TLS + ACL obligatoires en production, jamais d'accès
   anonyme, attention aux retained messages (une vieille commande
   conservée peut être rejouée).

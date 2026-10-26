@@ -21,7 +21,8 @@
         "capability.report",
         "health",
         "audit",
-        "simulation"
+        "simulation",
+        "user_situation"
       ]
     },
     "source": {

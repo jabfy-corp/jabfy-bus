@@ -30,10 +30,20 @@ def create_app(
     bus: UniversalJsonBus,
     registry: EntityRegistry,
     audit: AuditLog | None = None,
+    allowed_origins: list[str] | None = None,
 ) -> Any:
     """Construit l'application FastAPI branchée sur le bus."""
     fastapi = _require_fastapi()
+    from fastapi.middleware.cors import CORSMiddleware  # noqa: PLC0415 - optionnel
+
     app = fastapi.FastAPI(title="JABFY Universal JSON Bus", version="1.0")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=allowed_origins or [],
+        allow_methods=["GET"],
+        allow_headers=["Content-Type"],
+        allow_credentials=False,
+    )
 
     @app.get("/health")
     def health() -> dict[str, Any]:

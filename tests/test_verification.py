@@ -40,6 +40,10 @@ class TestRiskClassification(unittest.TestCase):
         entity = Entity(id="machine.press_01", domain="machine")
         self.assertIs(classify_risk(Action.START, entity), RiskLevel.CRITICAL)
 
+    def test_cover_position_is_medium(self):
+        entity = Entity(id="cover.salon_blind", domain="cover")
+        self.assertIs(classify_risk(Action.SET_POSITION, entity), RiskLevel.MEDIUM)
+
     def test_unknown_action_is_critical(self):
         self.assertIs(classify_risk("frobnicate"), RiskLevel.CRITICAL)
 

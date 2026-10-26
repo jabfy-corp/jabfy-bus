@@ -32,6 +32,16 @@ class TestNewMessage(unittest.TestCase):
         self.assertIn("T", msg.timestamp)
         self.assertEqual(msg.bus_version, "1.0")
 
+    def test_user_situation_message_is_valid(self):
+        msg = new_message(
+            "user_situation",
+            adapter="core",
+            protocol="internal",
+            trust_level=TrustLevel.INTERNAL,
+            raw={"prompt": "allume le salon", "model": "agent"},
+        )
+        self.assertEqual(msg.message_type, MessageType.USER_SITUATION.value)
+
     def test_two_messages_have_distinct_ids(self):
         self.assertNotEqual(make_telemetry().message_id, make_telemetry().message_id)
 

@@ -76,6 +76,7 @@ L'implémentation de référence est `jabfy_bus/core/message.py`.
 | `health` | Adapters (état de l'adapter/device) |
 | `audit` | Couche audit |
 | `simulation` | Simulation Lab |
+| `user_situation` | Core (consigne utilisateur, entrée du raisonnement) |
 
 ## Anti-patterns
 

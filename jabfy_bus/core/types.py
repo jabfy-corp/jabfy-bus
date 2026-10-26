@@ -24,6 +24,7 @@ class MessageType(str, Enum):
     HEALTH = "health"
     AUDIT = "audit"
     SIMULATION = "simulation"
+    USER_SITUATION = "user_situation"
 
 
 class Domain(str, Enum):
@@ -92,6 +93,9 @@ class Action(str, Enum):
     SET_BRIGHTNESS = "set_brightness"
     SET_COLOR = "set_color"
     SET_TEMPERATURE = "set_temperature"
+    SET_POSITION = "set_position"
+    SET_TILT = "set_tilt"
+    SET_MODE = "set_mode"
     OPEN = "open"
     CLOSE = "close"
     STOP = "stop"
